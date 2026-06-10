@@ -284,6 +284,15 @@ function setupEventListeners() {
             render();
         });
     });
+    
+    // Dismiss any active delete buttons on clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.book-item') && !e.target.closest('.book-card')) {
+            document.querySelectorAll('.show-delete-active').forEach(el => {
+                el.classList.remove('show-delete-active');
+            });
+        }
+    });
 }
 
 // NEW BOOK RATING SELECTOR LOGIC
@@ -785,6 +794,14 @@ function renderAuthorDetailView(books, authorName) {
                 </div>
             `;
             
+            // Attach long press to reveal delete button
+            addLongPressListener(bookRow, () => {
+                document.querySelectorAll('.show-delete-active').forEach(el => {
+                    if (el !== bookRow) el.classList.remove('show-delete-active');
+                });
+                bookRow.classList.toggle('show-delete-active');
+            });
+            
             bookRow.querySelector('.delete-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteBook(book.id, book.title);
@@ -908,7 +925,16 @@ function renderAlphabetView(books) {
                 </div>
             `;
             
-            bookRow.querySelector('.delete-btn').addEventListener('click', () => {
+            // Attach long press to reveal delete button
+            addLongPressListener(bookRow, () => {
+                document.querySelectorAll('.show-delete-active').forEach(el => {
+                    if (el !== bookRow) el.classList.remove('show-delete-active');
+                });
+                bookRow.classList.toggle('show-delete-active');
+            });
+            
+            bookRow.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
                 deleteBook(book.id, book.title);
             });
             
@@ -970,6 +996,14 @@ function renderAllBooksView(books) {
                 ${getStarsHTML(book.id, book.rating)}
             </div>
         `;
+        
+        // Attach long press to reveal delete button
+        addLongPressListener(bookCard, () => {
+            document.querySelectorAll('.show-delete-active').forEach(el => {
+                if (el !== bookCard) el.classList.remove('show-delete-active');
+            });
+            bookCard.classList.toggle('show-delete-active');
+        });
         
         bookCard.querySelector('.delete-btn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1110,3 +1144,36 @@ function handleDisconnectSync() {
         render();
     }
 }
+
+// LONG PRESS UTILITY TO DETECT TOUCH AND HOLD
+function addLongPressListener(element, callback) {
+    let timer = null;
+    const delay = 700; // 700ms long press duration
+    
+    function start(e) {
+        // Prevent right click trigger or non-primary triggers
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        
+        timer = setTimeout(() => {
+            callback(e);
+        }, delay);
+    }
+    
+    function cancel() {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    }
+    
+    // Mouse Events
+    element.addEventListener('mousedown', start);
+    element.addEventListener('mouseup', cancel);
+    element.addEventListener('mouseleave', cancel);
+    
+    // Touch Events (mobile friendly)
+    element.addEventListener('touchstart', start, { passive: true });
+    element.addEventListener('touchend', cancel);
+    element.addEventListener('touchcancel', cancel);
+}
+

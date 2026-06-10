@@ -724,11 +724,36 @@ body {
     align-items: center;
     justify-content: center;
     transition: var(--transition);
+    
+    /* Hidden by default, slides in on long press */
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin: 0;
 }
 
 .delete-btn:hover {
     color: var(--color-red);
     background: rgba(239, 68, 68, 0.1);
+}
+
+/* Revealed state on long press */
+.book-item.show-delete-active .delete-btn,
+.book-card.show-delete-active .delete-btn {
+    width: 32px;
+    opacity: 1;
+    margin-right: 12px;
+    overflow: visible;
+}
+
+.book-item.show-delete-active {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    background: rgba(239, 68, 68, 0.02) !important;
+}
+
+.book-card.show-delete-active {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    background: rgba(239, 68, 68, 0.02) !important;
 }
 
 /* VIEW: ALPHABET (GRID) */
