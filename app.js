@@ -130,6 +130,27 @@ function loadLocalData() {
     if (storedBooks) {
         try {
             booksState = JSON.parse(storedBooks);
+            // מיזוג אוטומטי של ספרים מתוך INITIAL_BOOKS שלא קיימים ב-localStorage (למשל לאחר עדכון books_data.js)
+            if (typeof INITIAL_BOOKS !== 'undefined' && Array.isArray(INITIAL_BOOKS)) {
+                let mergedCount = 0;
+                INITIAL_BOOKS.forEach(initBook => {
+                    const exists = booksState.some(b => 
+                        b.title.trim().toLowerCase() === initBook.title.trim().toLowerCase() && 
+                        b.author.trim().toLowerCase() === initBook.author.trim().toLowerCase()
+                    );
+                    if (!exists) {
+                        booksState.push({
+                            ...initBook,
+                            id: generateId()
+                        });
+                        mergedCount++;
+                    }
+                });
+                if (mergedCount > 0) {
+                    saveToStorage();
+                    console.log(`Merged ${mergedCount} new books from INITIAL_BOOKS into localStorage.`);
+                }
+            }
         } catch (e) {
             console.error('Error parsing stored books, falling back to INITIAL_BOOKS', e);
             useFallbackBooks();
